@@ -1,0 +1,93 @@
+﻿@using Blazor_TicTac_Mvvm.Data.GameData
+@if (LocalBoardData != null)
+    @if (LocalBoardData.SmallBoardWon == TicTacState.Draw)
+    {
+        <div class="sboard fullBoard">
+            <h1 style="width: 240px; height: 240px; font-size: 100px" class="smallField">#</h1>
+        </div>
+    }
+    else if (LocalBoardData.SmallBoardWon != TicTacState.Nobody)
+    {
+        <div class="sboard @(LocalBoardData.SmallBoardWon == TicTacState.X ? "wonByX" : "wonByO")">
+            <h1 style="width: 240px; height: 240px; font-size: 100px" class="smallField">@LocalBoardData.SmallBoardWon</h1>
+        </div>
+    }
+    else
+    {
+        <div class="sboard @(LocalBoardData.CurrentlyActive ? "activeBoard" : "standbyBoard")">
+            @for (int i = 0; i < 9; i++)
+            {
+                var position = i;
+                if (LocalBoardData.Fields[position] == TicTacState.Nobody)
+                {
+                    <MudButton OnClick="@(()=> FieldPressed.InvokeAsync((Index, position)))"
+                               Variant="Variant.Filled"
+                               Disabled=@(LocalBoardData.CurrentlyDeactivated)></MudButton>
+                }
+                else
+                {
+                    <h1 class="smallField">@LocalBoardData.Fields[position]</h1>
+                }
+            }
+        </div>
+    }
+
+<style scoped>
+    .sboard {
+        display: grid;
+        grid-template-columns: 80px 80px 80px;
+        grid-template-rows: 80px 80px 80px;
+        padding: 10px;
+        width: 260px;
+        height: 260px;
+        border-radius: 10%;
+    }
+    /*     {
+                display: grid;
+                grid-template-columns: 275px 275px 275px;
+                grid-template-rows: 275px 275px 275px;
+                padding: 10px;
+            } */
+
+    .activeBoard {
+        background-color: #0a8efa;
+    }
+
+    .standbyBoard {
+        background-color: #ff6a00;
+    }
+
+    .wonByX {
+        background-color: cyan;
+    }
+
+    .wonByO {
+        background-color: deeppink;
+    }
+
+    .fullBoard {
+        background-color: crimson
+    }
+
+    .smallField {
+        align-content: center;
+        font-size: 40px;
+        text-align: center;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public GameBoardData BoardData { get; set; }
+
+    [Parameter]
+    public int Index { get; set; }
+
+    [Parameter]
+    public EventCallback<(int boardIndex, int fieldIndex)> FieldPressed { get; set; }
+
+    // [CascadingParameter(Name = "CurrentlyYourTurn")]
+    // public bool CurrentlyYourTurn { get; set; }
+
+    protected SmallBoardData LocalBoardData => BoardData?.Boards[Index];
+}

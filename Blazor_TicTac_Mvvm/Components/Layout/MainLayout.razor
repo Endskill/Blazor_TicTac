@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<AuthorizeView>
+    <NotAuthorized>
+        @Body
+    </NotAuthorized>
+    <Authorized>
+        <MudLayout>
+            <MudAppBar Elevation="1" Dense="false">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+                <h4>Super TTT</h4>
+                @* <MudTextField T="string" Text="Tic Tac Toe"></MudTextField> *@
+                <MudSpacer />
+                <MudIconButton ></MudIconButton>
+                @* TODO Zeug schreiben, damit man sich ausloggen kann. *@
+                <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Target="_blank" />
+            </MudAppBar>
+
+            <MudMainContent Class="mt-5 px-5">
+                @Body
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private bool _drawerOpen = false;
+    Breakpoint breakpoint = Breakpoint.Lg;
+    DrawerClipMode clipMode = DrawerClipMode.Never;
+
+    public void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

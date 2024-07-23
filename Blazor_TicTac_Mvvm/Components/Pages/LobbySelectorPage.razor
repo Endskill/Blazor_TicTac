@@ -1,0 +1,112 @@
+﻿@inherits MvvmComponentBase<LobbySelectorViewModel>
+@page "/lobbyselector"
+@using System.Runtime.InteropServices
+@using Blazor_TicTac_Mvvm.Data.Database.Models
+@using System.Text
+
+<MudPaper Elevation="1">
+    <MudGrid>
+        <MudItem xs="2">
+            <MudPaper Elevation="2" Style="padding: 10px; margin:10px;">
+                <MudStack>
+                    <MudTextField T="string" Label="Game name"
+                                  @bind-Text=@Vm.GameName
+                                  Immediate=true />
+                    <MudButton OnClick=@Vm.CreateMatchAsync
+                               Disabled=@string.IsNullOrEmpty(Vm.GameName)
+                               Variant="Variant.Filled"
+                               Color="Color.Success">
+                        Create game
+                    </MudButton>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="6">
+            <MudPaper Elevation="2" Style="padding: 10px; margin: 10px">
+                <MudDataGrid Items="@Vm.SearchingGames"
+                             Filterable=false Groupable=false SortMode="@SortMode.None">
+                    <Columns>
+                        <PropertyColumn Property="x => x.GameName" Title="Lobby name" />
+                        <PropertyColumn Property="x => x.HostModel.Name" Title="Hoster" />
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <CellTemplate>
+                                <MudButton OnClick=@(()=>Vm.JoinGameAsync(context.Item))
+                                           Variant="Variant.Filled"
+                                           Disabled=@(context.Item.HostPlayerId == Vm.LocalPlayerId)
+                                           Color="Color.Primary">
+                                    Join
+                                </MudButton>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="4">
+            <MudPaper Elevation="2" Style="padding: 10px; margin: 10px">
+                <MudChip T=string>Game history</MudChip>
+                <MudList T="SuperTicTacGameModel">
+                    @foreach (var game in Vm?.PlayedGames ?? new List<SuperTicTacGameModel>())
+                    {
+                        var model = game;
+                        <MudListItem Text=@BuildHistoryText(model)
+                            OnClick=@(()=>Vm.OpenHistoryGame(model))>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Vm.AuthenticationStateTask = AuthenticationStateTask;
+
+        base.OnParametersSet();
+    }
+
+    string BuildHistoryText(SuperTicTacGameModel gameModel)
+    {
+        var text = new StringBuilder();
+        //Since only the client has an authenticationState. The server never gets anything from Vm?.PlayedGames
+        var user = AuthenticationStateTask.Result;
+        var id = user.User.Identities.First()
+              .Claims.First(x => x.Type == System.Security.Claims.ClaimTypes.Sid).Value;
+        var playerId = Convert.ToInt32(id);
+
+        if (gameModel.SuperGameState == Data.GameData.TicTacState.X)
+        {
+            if (gameModel.PlayerX_Id == playerId )
+                text.Append("Win: \t");
+            else
+                text.Append("Lose: \t");
+        }
+        else if (gameModel.SuperGameState == Data.GameData.TicTacState.O)
+        {
+            if (gameModel.PlayerO_Id == playerId)
+                text.Append("Win: \t");
+            else
+                text.Append("Lose: \t");
+        }
+        else if (gameModel.SuperGameState == Data.GameData.TicTacState.Draw)
+        {
+            text.Append("Draw: \t");
+        }
+        else
+        {
+            text.Append("Undecided: ");
+        }
+
+        text.Append($"{gameModel.PlayerX.Name} vs {gameModel.PlayerO.Name}");
+
+        return text.ToString();
+    }
+}

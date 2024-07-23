@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Authorization
+
+@page "/"
+
+@attribute [Authorize(Roles = "Admin")]
+
+<h3>HomePage</h3>
+
+@code {
+
+}

@@ -1,0 +1,64 @@
+﻿@page "/login"
+
+@inherits MvvmComponentBase<LoginViewModel>
+
+<div class="center2">
+    <MudPaper Elevation="1">
+        <MudStack Style="padding: 10px; ">
+            <div style="font-size:19px; left: 50%; ">Login</div>
+            <MudTextField T="string" Label="Username" @bind-Text=Vm.Username
+                          Immediate=true />
+            @if (Vm.UsernameDoesNotExist)
+            {
+                <MudGrid>
+                    <MudItem xs="8">
+                        <MudButton OnClick="@Vm.LoginAsync" FullWidth=true
+                                   Disabled=@(Vm.UsernameDoesNotExist || Vm.UsernameEmptyOrNull)
+                                   Variant="Variant.Filled" Color="Color.Success">Login</MudButton>
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudButton OnClick=@Vm.CreateUserAsync
+                                   StartIcon="@Icons.Material.Filled.Input">Create user</MudButton>
+                    </MudItem>
+                </MudGrid>
+            }
+            else
+            {
+                <MudButton OnClick="@Vm.LoginAsync"
+                           Variant="Variant.Filled" Color="Color.Success"
+                           Disabled=@Vm.UsernameEmptyOrNull>Login</MudButton>
+            }
+        </MudStack>
+    </MudPaper>
+    <MudButton OnClick="@Vm.Debug_Login1" Color="Color.Info"
+               Variant="Variant.Outlined">Debug_Login1</MudButton>
+    <MudButton OnClick="@Vm.Debug_Login2" Color="Color.Info">Debug_Login2</MudButton>
+    <MudButton OnClick="@Vm.Debug_RestartDatabaseAsync" Color="Color.Info">Restart_Database</MudButton>
+</div>
+
+<style scoped>
+    .center {
+        width: 500px;
+        height: 250px;
+        margin: 50px;
+        outline: solid 1px black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .center2 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 10px;
+    }
+</style>
+
+@code {
+    [Inject] private IDialogService Dialog { get; set; }
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthenticationStateTask { get; set; }
+}

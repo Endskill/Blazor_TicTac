@@ -1,0 +1,41 @@
+﻿@inherits MvvmComponentBase<SuperTicTacViewModel>
+
+@page "/supertictactoe"
+@using Blazor_TicTac_Mvvm.Components.Controls
+
+<div class="board">
+    @for (int i = 0; i < 9; i++)
+    {
+        int position = i;
+        <SmallTicTacToe Index=position FieldPressed=@Vm.PlaceFieldAsync
+                        BoardData=@Vm.BoardData/>
+    }
+</div>
+
+<style scoped>
+    .board {
+        display: grid;
+        grid-template-columns: 275px 275px 275px;
+        grid-template-rows: 275px 275px 275px;
+        padding: 10px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = nameof(MatchId))]
+    public string MatchId { get; set; }
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        //TODO herausfinden, wie man URL Parameter am schönsten an dem ViewModel weiterleitet.
+        //Vielleicht Interface für die Page erstellen und dann ViewModel nur Instanz von dem Interface geben?
+        Vm.MatchId = Guid.Parse(MatchId);
+        Vm.AuthenticationState = AuthenticationStateTask;
+
+        return base.OnInitializedAsync();
+    }
+}
